@@ -83,21 +83,23 @@
 #' @family archivist
 #' @rdname createEmptyRepo
 #' @export
-createLocalRepo <- function( repoDir, force = FALSE, default = FALSE ){
-  stopifnot( is.character( repoDir ), length( repoDir ) == 1 )
-  stopifnot( is.logical( default ), length( default ) == 1 )
-  
-  if ( file.exists( repoDir ) & file.exists( paste0(repoDir,"/backpack.db") ) & !force ){
-    message( paste0("Directory ", repoDir, " does exist and contain the backpack.db file. Use force=TRUE to reinitialize.") )
-    return(invisible( repoDir ))  
-  } 
-  if ( file.exists( repoDir ) & file.exists( paste0(repoDir,"/backpack.db") ) & force ){
-    message( paste0("Directory ", repoDir, " does exist and contain the backpack.db file. Reinitialized due to force=TRUE.") )
+createLocalRepo <- function( repoDir, force = FALSE, default = FALSE ) {
+  if ( isFALSE(aoptions("useExternalDatabase")) ) {
+    stopifnot( is.character( repoDir ), length( repoDir ) == 1 )
+    stopifnot( is.logical( default ), length( default ) == 1 )
+    
+    if ( file.exists( repoDir ) & file.exists( paste0(repoDir,"/backpack.db") ) & !force ) {
+      message( paste0("Directory ", repoDir, " does exist and contain the backpack.db file. Use force=TRUE to reinitialize.") )
+      return(invisible( repoDir ))  
+    } 
+    if ( file.exists( repoDir ) & file.exists( paste0(repoDir,"/backpack.db") ) & force ) {
+      message( paste0("Directory ", repoDir, " does exist and contain the backpack.db file. Reinitialized due to force=TRUE.") )
+    }
+    if ( !file.exists( repoDir ) ) {
+      dir.create( repoDir )
+    }
   }
-  if ( !file.exists( repoDir ) ){
-    dir.create( repoDir )
-  }
-  
+
   # create connection
   backpack <- getConnectionToDB( repoDir )
   
@@ -111,11 +113,14 @@ createLocalRepo <- function( repoDir, force = FALSE, default = FALSE ){
                     tag = "", 
                     createdDate = as.character( now() ), 
                     stringsAsFactors = FALSE )
-  
+
   # insert tables into database
-  dbWriteTable( backpack, "artifact", artifact, overwrite = TRUE, row.names = FALSE )
-  dbWriteTable( backpack, "tag", tag, overwrite = TRUE, row.names = FALSE )
-  
+  ## createdDate not date type?
+  ## md5hash should have fixed length (and maybe mis-named since other hashes possible)
+  dbWriteTable( backpack, "artifact", artifact, overwrite = TRUE, row.names = FALSE,
+                field.types = c(md5hash = "text", name = "text", createdDate = "text") )
+  dbWriteTable( backpack, "tag", tag, overwrite = TRUE, row.names = FALSE,
+                field.types = c(artifact = "text", tag = "text", createdDate = "text") )
   
   dbExecute(backpack, "delete from artifact")
   dbExecute(backpack, "delete from tag")
@@ -170,14 +175,14 @@ addArtifact <- function( md5hash, name, dir ){
   # creates connection and driver
   # send insert
   executeSingleSilentQuery( dir,
-              paste0( "insert into artifact (md5hash, name, createdDate) values",
+              paste0( "insert into artifact (\"md5hash\", \"name\", \"createdDate\") values",
                       "('", md5hash, "', '", name, "', '", as.character( now() ), "')" ) )
 }
 
 addTag <- function( tag, md5hash, createdDate = now(), dir ){
   executeSingleSilentQuery( dir,
-                            paste0("insert into tag (artifact, tag, createdDate) values ",
-                                   "('", md5hash, "', '", gsub(tag, pattern="'", replacement=""), "', '", as.character( now() ), "')" ) )
+                            paste0("insert into tag (\"artifact\", \"tag\", \"createdDate\") values ",
+                                   "('", md5hash, "', '", gsub(tag, pattern = "'", replacement = ""), "', '", as.character( now() ), "')" ) )
 }
 
 # realDBname was needed because Github version function uses temporary file as database
@@ -265,8 +270,12 @@ checkDirectory <- function( directory ){
         stop( paste0( "There is no such repository as ", directory ) )
       }
       # check if repository is proper (has backpack.db and gallery)
-      if ( !all( c("backpack.db", "gallery") %in% list.files(directory) ) ){
-        stop( paste0( directory, " is not a proper repository. There is neither backpack.db nor gallery." ) )
+      if ( isFALSE(dir.exists(file.path(directory, "gallery"))) ){
+        stop( paste0( directory, " is not a proper repository. There is no gallery/ subdirectory." ) )
+      }
+      if ( isFALSE(aoptions("useExternalDatabase")) &
+           isFALSE(file.exists(file.path(directory, "backpack.db"))) ) {
+        stop( paste0( directory, " is not a proper repository. There is no backpack.db file." ) )
       }
     }
   return( directory )
