@@ -30,21 +30,21 @@ LazyData: yes
 Depends:
     R (>= 3.2.0)
 Imports:
-    RCurl,
-    digest,
-    httr,
     DBI,
+    digest,
+    flock,
+    httr,
     lubridate,
-    RSQLite,
     magrittr,
-    flock
+    RCurl,
+    RSQLite
 Suggests:
-    shiny,
-    dplyr,
-    testthat,
-    ggplot2,
     devtools,
-    knitr
+    dplyr,
+    ggplot2,
+    knitr,
+    testthat,
+    shiny
 URL: https://pbiecek.github.io/archivist/
 BugReports: https://github.com/pbiecek/archivist/issues
 RoxygenNote: 6.1.1

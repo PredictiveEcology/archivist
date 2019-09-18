@@ -104,8 +104,7 @@
 #' @family archivist
 #' @rdname archivistOptions
 #' @export
-aoptions <- function(key, value=NULL, unset = FALSE) {
-  
+aoptions <- function(key, value = NULL, unset = FALSE) {
   stopifnot( is.character( key ) )
   stopifnot( is.logical( unset ) )
   if (unset | !is.null(value)) {

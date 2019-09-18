@@ -123,7 +123,7 @@ createLocalRepo <- function( repoDir, force = FALSE, default = FALSE ){
   dbDisconnect( backpack )
   
   # if gallery folder does not exist - make it
-  if ( !file.exists( file.path( repoDir, "gallery" ) ) ){
+  if ( !file.exists( file.path( repoDir, "gallery" ) ) ) {
     dir.create( file.path( repoDir, "gallery" ), showWarnings = FALSE)
   }
   
@@ -152,8 +152,8 @@ createPostgresRepo <- function( repoDir, connector, force = FALSE, default = FAL
     dir.create( repoDir )
   }
 
-  .ArchivistEnv$useExternalDatabase <- TRUE
-  .ArchivistEnv$externalConnector <- connector
+  .ArchivistEnv$useExternalDatabase <- TRUE     ## aoptions("useExternalDatabase", TRUE)
+  .ArchivistEnv$externalConnector <- connector  ## aoptions("externalConnector", connector)
   
   createLocalRepo( repoDir, force = force, default = default )
 }
@@ -185,10 +185,11 @@ addTag <- function( tag, md5hash, createdDate = now(), dir ){
 getConnectionToDB <- function( repoDir ){
   useExternal <- get( "useExternalDatabase", envir = .ArchivistEnv )
   if (!is.null(useExternal) & useExternal) {
-    externalConnector <- get( "externalConnector", envir = .ArchivistEnv )
+    externalConnector <- get( "externalConnector", envir = .ArchivistEnv ) ## use aptions()?
     externalConnector()
   } else {
-    dbConnect( get( "sqlite", envir = .ArchivistEnv ), file.path( repoDir, "backpack.db" ) )
+    dbConnect( get( "sqlite", envir = .ArchivistEnv ), ## use aptions()?
+               file.path( repoDir, "backpack.db" ) )
   }
 }
   

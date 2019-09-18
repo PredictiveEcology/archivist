@@ -161,7 +161,7 @@
 #' @export
 saveToLocalRepo <- function(
   artifact, 
-  repoDir = aoptions('repoDir'), 
+  repoDir = aoptions("repoDir"), 
   archiveData = TRUE,
   archiveTags = TRUE,
   archiveMiniature = TRUE, 
@@ -207,11 +207,11 @@ saveToLocalRepo <- function(
   } 
 
   assign(x = artifactName, value = artifact)
-  save( file = file.path(repoDir,"gallery", paste0(md5hash, ".rda")), ascii = ascii, list = artifactName)
-  addTag("format:rda", md5hash, dir=repoDir)
+  save( file = file.path(repoDir, "gallery", paste0(md5hash, ".rda")), ascii = ascii, list = artifactName)
+  addTag("format:rda", md5hash, dir = repoDir)
 
   # add entry to database
-   addArtifact( md5hash, name = artifactName, dir = repoDir )
+  addArtifact( md5hash, name = artifactName, dir = repoDir )
 
   # whether to add regular Tags
   if ( archiveTags ) {
@@ -267,12 +267,10 @@ saveToLocalRepo <- function(
   }
 }
 
-#'
 #' @rdname saveToRepo
 #' @export
 saveToRepo <- saveToLocalRepo
   
-#'
 #' @rdname saveToRepo
 #' @export
 asave <- saveToLocalRepo

@@ -135,7 +135,7 @@ setLocalRepo <- function( repoDir ){
 #' @export
 setPostgresRepo <- function( repoDir, connector = NULL){
   if (is.null(connector)) {
-    .ArchivistEnv$useExternalDatabase <- FALSE
+    .ArchivistEnv$useExternalDatabase <- FALSE  ## why not use aoptions()?
     return(invisible("disconnected"))
   } 
   
@@ -144,8 +144,8 @@ setPostgresRepo <- function( repoDir, connector = NULL){
   
   repoDir <- checkDirectory( repoDir )
   
-  .ArchivistEnv$useExternalDatabase <- TRUE
-  .ArchivistEnv$externalConnector <- connector
+  .ArchivistEnv$useExternalDatabase <- TRUE     ## why not use aoptions()?
+  .ArchivistEnv$externalConnector <- connector  ## why not use aoptions()?
   
   invisible(aoptions("repoDir", repoDir))
 }
